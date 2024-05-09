@@ -1,3 +1,71 @@
+<?php 
+    // B1: tính số mũ
+    function tinhMu($a, $n) {
+        return pow($a, $n);
+    }
+    // B2: Tour du lịch
+    $tour = [
+        "ten" => "HN - Điện Biên",
+        "noi_di" => "HN",
+        "noi_den" => "Điện Biên",
+        "gia_tien" => 1000000,
+        "ngay_di" => "2024-05-09",
+        "ngay_ve" => "2024-05-15",
+    ];
+    $listTour = [
+        [
+            "ten" => "HN - Điện Biên",
+            "noi_di" => "HN",
+            "noi_den" => "Điện Biên",
+            "gia_tien" => 1000000,
+            "ngay_di" => "2024-05-10",
+            "ngay_ve" => "2024-05-15",
+        ],
+        [
+            "ten" => "HN - Lào Cai",
+            "noi_di" => "HN",
+            "noi_den" => "Lào Cai",
+            "gia_tien" => 900000,
+            "ngay_di" => "2023-05-09",
+            "ngay_ve" => "2023-05-15",
+        ]
+    ];
+    $tourTimDuoc = [];
+    $giaTienCanTim = 0;
+    $ngayCanDi = "";
+    $ngayCanVe = "";
+    // Xử lý tìm kiếm
+    // form trong html dùng method="GET" dùng $_GET để lấy dữ liệu form đẩy lên
+    var_dump($_GET);
+    // kiểm tra xem bấm nút tìm kiếm nào
+    if (isset($_GET["btnTimGia"])) {
+        $giaTienCanTim = $_GET["gia_can_tim"];
+        // làm sạch danh sách tour 
+        $tourTimDuoc = [];
+        foreach ($listTour as $t) {
+            // Nếu giá tiền của tour <= giá tiền cần tìm
+            if ($t["gia_tien"] <= $giaTienCanTim) { 
+                // thêm tour đang duyệt vào danh sách tìm được
+                array_push($tourTimDuoc, $t);
+            }
+        }
+    }
+    // form trong html dùng method="POST" dùng $_POST để lấy dữ liệu form đẩy lên
+    // kiểm tra xem có bấm nút tìm theo ngày hay không
+    var_dump($_POST);
+    if (isset($_POST["btnTimNgay"])) {
+        $tourTimDuoc = [];
+        $ngayCanDi = strtotime($_POST["ngay_can_di"]);
+        $ngayCanVe = strtotime($_POST["ngay_can_ve"]);
+        foreach ($listTour as $tour) {
+            if (strtotime($tour["ngay_di"]) <= $ngayCanDi 
+            && $ngayCanVe <= strtotime($tour["ngay_ve"])) { 
+                array_push($tourTimDuoc, $tour);
+            }
+        }
+    }
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,64 +74,10 @@
     <title>Document</title>
 </head>
 <body>
-    <?php
-        // Bài 1
-        function tinhMu($a,$b){
-            return pow($a,$b);
-        }
-        $c = tinhMu(2,3);
-        echo "a^n = ".$c;
-        // Bài 2
-        $listTour = [
-            [
-                'ten' =>"MH370",
-                'noi_di'=>"malaysia",
-                'noi_den'=>"Bien den",
-                'gia_tien'=>100,
-                'ngay_di'=> "2024-07-22",
-                'ngay_ve'=> "2024-07-30"
-            ],
-            [
-                'ten' =>"MH371",
-                'noi_di'=>"ha noi",
-                'noi_den'=>"TPHCM",
-                'gia_tien'=>200,
-                'ngay_di'=> "2023-07-22",
-                'ngay_ve'=> "2023-07-22"
-            ],
-        ];
-        $tourTimDuoc = [];
-        $ngayCanDi = "";
-        $ngayCanVe = "";
-        $giaTienCanTim = 0;
-        // Xử lý tìm kiếm
-        if (isset($_POST['btnTim'])) {
-            $ngayCanDi = strtotime($_POST['ngay_can_di']); // strotime để đổi thời gian ra 1 số nguyên để so sánh
-            $ngayCanVe = strtotime($_POST['ngay_can_ve']);
-            $giaTienCanTim = (float) $_POST['gia_tien'];
-            if ($giaTienCanTim != 0) {
-                $tourTimDuoc = [];
-                // tìm theo giá tiền
-                foreach ($listTour as $tour) {
-                    if ($tour['gia_tien'] <= $giaTienCanTim) {
-                        array_push($tourTimDuoc,$tour);
-                    }
-                }
-                return;
-            }
-            if (!empty($ngayCanDi) && !empty($ngayCanVe)) {
-                $tourTimDuoc = [];
-                // tìm theo ngày đi và ngày về
-                foreach ($listTour as $tour) { 
-                    if ($tour['ngay_di'] >= $ngayCanDi && $tour['ngay_ve'] <= $ngayCanVe) {
-                        array_push($tourTimDuoc,$tour);
-                    }
-                }
-            }
-        }
-       
-    ?>
-    <!-- Bảng hiển thị danh sách -->
+    <!-- OUTPUT BÀI 1 -->
+    <h2>Bài 1:</h2>
+    <p> a^ n = <?php echo tinhMu(2,2); ?> </p>
+    <!-- BÀI 2 -->
     <h2>Danh sách tour</h2>
     <table border="1">
         <thead>
@@ -71,53 +85,104 @@
                 <td>Tên</td>
                 <td>Nơi đi</td>
                 <td>Nơi đến</td>
-                <td>Giá tiền</td>
+                <td>Giá</td>
                 <td>Ngày đi</td>
                 <td>Ngày về</td>
                 <td>Trạng thái</td>
             </tr>
         </thead>
-        <tbody>  
-            <?php foreach ($listTour as $key => $value) {
-                $mau = "";
-                $trang_thai = "";
-                // nếu ngày đi < ngày hiện tại hiển thị trạng thái hết hạn
-                
-                $ngay_di = strtotime($value['ngay_di']);
-                $ngay_ve = strtotime($value['ngay_ve']);
-                $ngayHienTai = strtotime("now");
-                echo $ngayHienTai . " - ". $ngay_di . "</br>";
-                    if ($ngayHienTai >= $ngay_di) {
-                        $mau = "blue";
-                        $trang_thai = "Có thể đặt";
-                    } else {
+        <tbody>
+            <?php 
+                foreach ($listTour as $tour) {
+                    // Nếu ngày đi < ngày hiện tại thì trạng thái  = không thể đặt, màu đỏ
+                    // Nếu ngày đi >= ngày hiện tại thì trạng thái = có thể đặt, màu xanh
+                    $mau = "";
+                    $trangThai = "";
+                    // strtotime chuyển chuỗi ngày tháng thành số
+                    $ngayHienTai = strtotime("now"); // lấy ngày hiện tại -> sttotime
+                    $ngay_di = strtotime($tour["ngay_di"]);
+                    $ngay_ve = strtotime($tour["ngay_ve"]);
+                    if ($ngay_di < $ngayHienTai) {
+                        $trangThai = "Không thể đặt";
                         $mau = "red";
-                        $trang_thai = "Không thể đặt";
+                    } else {
+                        $trangThai = "Có thể đặt";
+                        $mau = "blue";
                     }
-                    // xử lý các th khác ở đây
-                ?>
+            ?>
             <tr>
-                <td><?php echo $value['ten']; ?></td>
-                <td><?php echo $value['noi_di']; ?></td>
-                <td><?php echo $value['noi_den']; ?></td>
-                <td><?php echo $value['gia_tien']; ?></td>
-                <td><?php echo $value['ngay_di']; ?></td>
-                <td><?php echo $value['ngay_ve']; ?></td>
-                <td bgcolor="<?php echo $mau; ?>"><?php echo $trang_thai; ?></td>
+                <td><?php echo $tour["ten"] ;?></td>
+                <td><?php echo $tour["noi_di"] ;?></td>
+                <td><?php echo $tour["noi_den"] ;?></td>
+                <td><?php echo $tour["gia_tien"] ;?></td>
+                <td><?php echo $tour["ngay_di"] ;?></td>
+                <td><?php echo $tour["ngay_ve"] ;?></td>
+                <td style="color: <?php echo $mau;?>"> 
+                    <?php echo $trangThai;?>
+                </td>
             </tr>
-            <?php } ?>
-        
+            <?php      } ?>
         </tbody>
     </table>
-     <!-- Form tìm kiếm -->
-     <form action="" method="POST">
-        Giá tiền: <input type="number" name="gia_tien"> <br>
-        Ngày đi: <input type="datetime-local" name="ngay_can_di"> <br>
-        Ngày đến: <input type="datetime-local" name="ngay_can_ve"> <br>
-        <input type="submit" name="btnTim" value="Tìm kiếm">
+    <!-- TÌM KIẾM -->
+    <!-- Tìm theo giá tiền -->
+    <form action="" method="GET">
+        Giá tiền : <input type="number" name="gia_can_tim"> <br>
+        <input type="submit" name="btnTimGia" value="Tìm kiếm"> 
     </form>
-    <!-- Danh sách sau khi tìm -->
-    <h2>Danh sách sau khi tìm</h2>
+    <!-- Tìm theo ngày đi ngày về -->
+    <form action="" method="POST">
+         Ngày đi: <input type="datetime-local" name="ngay_can_di"> <br>
+         Ngày về: <input type="datetime-local" name="ngay_can_ve"> <br>
+         <input  type="submit" name="btnTimNgay" value="Tìm kiếm">
+    </form>
+
+    <h2>Danh sách tour tìm được</h2>
+    <table border="1">
+        <thead>
+            <tr>
+                <td>Tên</td>
+                <td>Nơi đi</td>
+                <td>Nơi đến</td>
+                <td>Giá</td>
+                <td>Ngày đi</td>
+                <td>Ngày về</td>
+                <td>Trạng thái</td>
+            </tr>
+        </thead>
+        <tbody>
+            <?php 
+                foreach ($tourTimDuoc as $tour) {
+                    // Nếu ngày đi < ngày hiện tại thì trạng thái  = không thể đặt, màu đỏ
+                    // Nếu ngày đi >= ngày hiện tại thì trạng thái = có thể đặt, màu xanh
+                    $mau = "";
+                    $trangThai = "";
+                    // strtotime chuyển chuỗi ngày tháng thành số
+                    $ngayHienTai = strtotime("now"); // lấy ngày hiện tại -> sttotime
+                    $ngay_di = strtotime($tour["ngay_di"]);
+                    $ngay_ve = strtotime($tour["ngay_ve"]);
+                    if ($ngay_di < $ngayHienTai) {
+                        $trangThai = "Không thể đặt";
+                        $mau = "red";
+                    } else {
+                        $trangThai = "Có thể đặt";
+                        $mau = "blue";
+                    }
+            ?>
+            <tr>
+                <td><?php echo $tour["ten"] ;?></td>
+                <td><?php echo $tour["noi_di"] ;?></td>
+                <td><?php echo $tour["noi_den"] ;?></td>
+                <td><?php echo $tour["gia_tien"] ;?></td>
+                <td><?php echo $tour["ngay_di"] ;?></td>
+                <td><?php echo $tour["ngay_ve"] ;?></td>
+                <td style="color: <?php echo $mau;?>"> 
+                    <?php echo $trangThai;?>
+                </td>
+            </tr>
+            <?php      } ?>
+        </tbody>
+    </table>
+
 </body>
 </html>
-
